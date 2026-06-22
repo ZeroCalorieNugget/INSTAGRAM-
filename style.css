@@ -98,7 +98,7 @@ button {
 }
 
 .hero {
-  max-width: 850px;
+  max-width: 1120px;
   margin: 0 auto 22px;
   text-align: center;
 }
@@ -118,9 +118,10 @@ p {
 
 h1 {
   margin-bottom: 16px;
-  font-size: clamp(38px, 7vw, 72px);
+  font-size: clamp(38px, 5.3vw, 64px);
   line-height: 1.04;
   letter-spacing: 0;
+  white-space: nowrap;
 }
 
 h2 {
@@ -535,6 +536,10 @@ a:hover {
 
   .top-bar {
     margin-bottom: 34px;
+  }
+
+  h1 {
+    white-space: normal;
   }
 
   .privacy-note {
