@@ -5,6 +5,96 @@ const searchInput = document.querySelector("#searchInput");
 const sortButton = document.querySelector("#sortButton");
 const copyButton = document.querySelector("#copyButton");
 const csvButton = document.querySelector("#csvButton");
+const languageButtons = document.querySelectorAll(".language-button");
+
+const translations = {
+  zh: {
+    pageTitle: "Instagram 未回关筛选工具",
+    eyebrow: "本地处理 · 不上传文件",
+    title: "Instagram 未回关筛选工具",
+    intro: "上传 Instagram 导出的 following.json 和 followers_1.json，快速找出你关注了、但对方没有关注你的用户。",
+    privacy: "所有 JSON 都只在你的浏览器里读取和对比，不会上传到任何服务器。",
+    stepOne: "步骤 1",
+    stepTwo: "步骤 2",
+    followingHelp: "我正在关注的人，通常包含 relationships_following。",
+    followersHelp: "正在关注我的人，通常是包含 string_list_data 的数组。",
+    followingChoose: "选择 following.json",
+    followersChoose: "选择 followers_1.json",
+    noFile: "尚未选择文件",
+    compare: "筛选未回关用户",
+    resultsEyebrow: "结果",
+    resultsTitle: "未回关名单",
+    followingCount: "我关注的人",
+    followersCount: "关注我的人",
+    notFollowingBackCount: "没有回关我",
+    searchLabel: "搜索用户名",
+    searchPlaceholder: "输入 username",
+    copy: "复制用户名",
+    downloadCsv: "下载 CSV",
+    username: "用户名",
+    instagramLink: "Instagram 链接",
+    followedAt: "关注时间",
+    sortDesc: "新到旧",
+    sortAsc: "旧到新",
+    empty: "没有找到匹配的未回关用户。",
+    invalidJsonFile: "请上传 .json 文件。",
+    missingFiles: "请先上传 following.json 和 followers_1.json。",
+    missingFollowing: "following.json 中没有找到关注列表。请确认文件是否包含 relationships_following。",
+    missingFollowers: "followers_1.json 中没有找到粉丝列表。请确认文件是否为 Instagram 导出的 followers_1.json。",
+    invalidJson: "{fileName} 不是有效的 JSON 文件。",
+    cannotRead: "无法读取 {fileName}。",
+    parseFailed: "解析文件失败，请检查 JSON 文件格式。",
+    complete: "筛选完成，结果只在当前浏览器中生成。",
+    noCopy: "当前没有可复制的用户名。",
+    copied: "已复制当前列表中的所有用户名。",
+    noDownload: "当前没有可下载的结果。",
+    csvStarted: "CSV 已开始下载。",
+    noDate: "无时间信息",
+  },
+  en: {
+    pageTitle: "Instagram Follow Back Checker",
+    eyebrow: "Local only · no uploads",
+    title: "Instagram Follow Back Checker",
+    intro: "Upload your Instagram following.json and followers_1.json files to find people you follow who do not follow you back.",
+    privacy: "Your JSON files are read and compared only inside your browser. Nothing is uploaded to a server.",
+    stepOne: "Step 1",
+    stepTwo: "Step 2",
+    followingHelp: "People you follow, usually stored under relationships_following.",
+    followersHelp: "People following you, usually an array with string_list_data.",
+    followingChoose: "Choose following.json",
+    followersChoose: "Choose followers_1.json",
+    noFile: "No file selected",
+    compare: "Find non-followers",
+    resultsEyebrow: "Results",
+    resultsTitle: "Not following back",
+    followingCount: "Following",
+    followersCount: "Followers",
+    notFollowingBackCount: "Not following back",
+    searchLabel: "Search username",
+    searchPlaceholder: "Type a username",
+    copy: "Copy usernames",
+    downloadCsv: "Download CSV",
+    username: "Username",
+    instagramLink: "Instagram link",
+    followedAt: "Followed at",
+    sortDesc: "Newest first",
+    sortAsc: "Oldest first",
+    empty: "No matching users found.",
+    invalidJsonFile: "Please upload a .json file.",
+    missingFiles: "Please upload both following.json and followers_1.json first.",
+    missingFollowing: "No following list found in following.json. Please check that it contains relationships_following.",
+    missingFollowers: "No follower list found in followers_1.json. Please check that it is the Instagram export file.",
+    invalidJson: "{fileName} is not a valid JSON file.",
+    cannotRead: "Could not read {fileName}.",
+    parseFailed: "Could not parse the files. Please check the JSON format.",
+    complete: "Done. The result was generated only in this browser.",
+    noCopy: "There are no usernames to copy.",
+    copied: "Copied all usernames in the current list.",
+    noDownload: "There are no results to download.",
+    csvStarted: "CSV download started.",
+    noDate: "No date available",
+  },
+};
 
 const state = {
   followingFile: null,
@@ -14,6 +104,7 @@ const state = {
   notFollowingBack: [],
   sortDirection: "desc",
   searchTerm: "",
+  lang: localStorage.getItem("preferredLanguage") || "zh",
 };
 
 followingInput.addEventListener("change", () => handleFileSelect("following"));
@@ -25,11 +116,42 @@ searchInput.addEventListener("input", () => {
 });
 sortButton.addEventListener("click", () => {
   state.sortDirection = state.sortDirection === "desc" ? "asc" : "desc";
-  document.querySelector("#sortLabel").textContent = state.sortDirection === "desc" ? "新到旧" : "旧到新";
+  updateSortLabel();
   renderTable();
 });
 copyButton.addEventListener("click", copyUsernames);
 csvButton.addEventListener("click", downloadCsv);
+languageButtons.forEach((button) => {
+  button.addEventListener("click", () => setLanguage(button.dataset.lang));
+});
+
+setLanguage(state.lang);
+
+function t(key, values = {}) {
+  const text = translations[state.lang][key] || translations.zh[key] || key;
+  return Object.entries(values).reduce((result, [name, value]) => result.replace(`{${name}}`, value), text);
+}
+
+function setLanguage(lang) {
+  state.lang = translations[lang] ? lang : "zh";
+  localStorage.setItem("preferredLanguage", state.lang);
+  document.documentElement.lang = state.lang === "zh" ? "zh-CN" : "en";
+  document.title = t("pageTitle");
+
+  document.querySelectorAll("[data-i18n]").forEach((element) => {
+    element.textContent = t(element.dataset.i18n);
+  });
+  document.querySelectorAll("[data-i18n-placeholder]").forEach((element) => {
+    element.placeholder = t(element.dataset.i18nPlaceholder);
+  });
+  languageButtons.forEach((button) => {
+    button.classList.toggle("is-active", button.dataset.lang === state.lang);
+  });
+
+  refreshFileLabels();
+  updateSortLabel();
+  renderTable();
+}
 
 function handleFileSelect(type) {
   const input = type === "following" ? followingInput : followersInput;
@@ -42,7 +164,7 @@ function handleFileSelect(type) {
 
   if (!file) {
     panel.classList.remove("has-file");
-    nameEl.textContent = "尚未选择文件";
+    nameEl.textContent = t("noFile");
     state[`${type}File`] = null;
     return;
   }
@@ -50,8 +172,8 @@ function handleFileSelect(type) {
   if (!file.name.toLowerCase().endsWith(".json")) {
     input.value = "";
     panel.classList.remove("has-file");
-    nameEl.textContent = "尚未选择文件";
-    errorEl.textContent = "请上传 .json 文件。";
+    nameEl.textContent = t("noFile");
+    errorEl.textContent = t("invalidJsonFile");
     state[`${type}File`] = null;
     return;
   }
@@ -65,7 +187,7 @@ async function compareLists() {
   clearStatus();
 
   if (!state.followingFile || !state.followersFile) {
-    showStatus("请先上传 following.json 和 followers_1.json。", true);
+    showStatus(t("missingFiles"), true);
     return;
   }
 
@@ -79,11 +201,11 @@ async function compareLists() {
     state.followerUsers = parseFollowers(followersJson);
 
     if (state.followingUsers.length === 0) {
-      throw new Error("following.json 中没有找到关注列表。请确认文件是否包含 relationships_following。");
+      throw new Error(t("missingFollowing"));
     }
 
     if (state.followerUsers.length === 0) {
-      throw new Error("followers_1.json 中没有找到粉丝列表。请确认文件是否为 Instagram 导出的 followers_1.json。");
+      throw new Error(t("missingFollowers"));
     }
 
     const followerSet = new Set(state.followerUsers.map((user) => normalizeUsername(user.username)));
@@ -96,10 +218,10 @@ async function compareLists() {
     renderStats();
     renderTable();
     document.querySelector("#resultsSection").hidden = false;
-    showStatus("筛选完成，结果只在当前浏览器中生成。", false);
+    showStatus(t("complete"), false);
   } catch (error) {
     document.querySelector("#resultsSection").hidden = true;
-    showStatus(error.message || "解析文件失败，请检查 JSON 文件格式。", true);
+    showStatus(error.message || t("parseFailed"), true);
   }
 }
 
@@ -111,11 +233,11 @@ function readJsonFile(file) {
       try {
         resolve(JSON.parse(reader.result));
       } catch {
-        reject(new Error(`${file.name} 不是有效的 JSON 文件。`));
+        reject(new Error(t("invalidJson", { fileName: file.name })));
       }
     };
 
-    reader.onerror = () => reject(new Error(`无法读取 ${file.name}。`));
+    reader.onerror = () => reject(new Error(t("cannotRead", { fileName: file.name })));
     reader.readAsText(file);
   });
 }
@@ -236,10 +358,10 @@ function getVisibleRows() {
 
 function formatDate(date) {
   if (!date) {
-    return "无时间信息";
+    return t("noDate");
   }
 
-  return new Intl.DateTimeFormat("zh-CN", {
+  return new Intl.DateTimeFormat(state.lang === "zh" ? "zh-CN" : "en", {
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
@@ -252,16 +374,16 @@ async function copyUsernames() {
   const usernames = getVisibleRows().map((user) => user.username).join("\n");
 
   if (!usernames) {
-    showStatus("当前没有可复制的用户名。", true);
+    showStatus(t("noCopy"), true);
     return;
   }
 
   try {
     await navigator.clipboard.writeText(usernames);
-    showStatus("已复制当前列表中的所有用户名。", false);
+    showStatus(t("copied"), false);
   } catch {
     fallbackCopy(usernames);
-    showStatus("已复制当前列表中的所有用户名。", false);
+    showStatus(t("copied"), false);
   }
 }
 
@@ -281,7 +403,7 @@ function downloadCsv() {
   const rows = getVisibleRows();
 
   if (rows.length === 0) {
-    showStatus("当前没有可下载的结果。", true);
+    showStatus(t("noDownload"), true);
     return;
   }
 
@@ -302,7 +424,16 @@ function downloadCsv() {
   link.click();
   link.remove();
   URL.revokeObjectURL(url);
-  showStatus("CSV 已开始下载。", false);
+  showStatus(t("csvStarted"), false);
+}
+
+function refreshFileLabels() {
+  document.querySelector("#followingFileName").textContent = state.followingFile ? state.followingFile.name : t("noFile");
+  document.querySelector("#followersFileName").textContent = state.followersFile ? state.followersFile.name : t("noFile");
+}
+
+function updateSortLabel() {
+  document.querySelector("#sortLabel").textContent = state.sortDirection === "desc" ? t("sortDesc") : t("sortAsc");
 }
 
 function csvEscape(value) {

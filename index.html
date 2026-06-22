@@ -8,26 +8,38 @@
   </head>
   <body>
     <main class="app-shell">
-      <header class="hero">
-        <div>
-          <p class="eyebrow">本地处理 · 不上传文件</p>
-          <h1>Instagram 未回关筛选工具</h1>
-          <p class="intro">
-            上传 Instagram 导出的 following.json 和 followers_1.json，快速找出你关注了、但对方没有关注你的用户。
-          </p>
+      <nav class="top-bar" aria-label="Page controls">
+        <div class="brand-mark" aria-hidden="true">IG</div>
+        <div class="language-switch" aria-label="Language">
+          <button class="language-button is-active" type="button" data-lang="zh">中文</button>
+          <button class="language-button" type="button" data-lang="en">English</button>
         </div>
+      </nav>
+
+      <header class="hero">
+        <p class="eyebrow" data-i18n="eyebrow">本地处理 · 不上传文件</p>
+        <h1 data-i18n="title">Instagram 未回关筛选工具</h1>
+        <p class="intro" data-i18n="intro">
+          上传 Instagram 导出的 following.json 和 followers_1.json，快速找出你关注了、但对方没有关注你的用户。
+        </p>
       </header>
 
-      <section class="upload-grid" aria-label="上传 JSON 文件">
+      <section class="privacy-note" aria-label="Privacy note">
+        <span class="privacy-dot" aria-hidden="true"></span>
+        <p data-i18n="privacy">所有 JSON 都只在你的浏览器里读取和对比，不会上传到任何服务器。</p>
+      </section>
+
+      <section class="upload-grid" aria-label="JSON file upload">
         <div class="upload-panel" id="followingPanel">
           <div class="upload-copy">
+            <span class="step-label" data-i18n="stepOne">步骤 1</span>
             <h2>following.json</h2>
-            <p>我正在关注的人，通常包含 relationships_following。</p>
+            <p data-i18n="followingHelp">我正在关注的人，通常包含 relationships_following。</p>
           </div>
           <label class="file-drop" for="followingInput">
-            <span class="file-icon" aria-hidden="true">↑</span>
-            <span class="file-main">选择 following.json</span>
-            <span class="file-name" id="followingFileName">尚未选择文件</span>
+            <span class="file-icon" aria-hidden="true">+</span>
+            <span class="file-main" data-i18n="followingChoose">选择 following.json</span>
+            <span class="file-name" id="followingFileName" data-i18n="noFile">尚未选择文件</span>
           </label>
           <input id="followingInput" type="file" accept=".json,application/json" />
           <p class="file-error" id="followingError" role="alert"></p>
@@ -35,48 +47,56 @@
 
         <div class="upload-panel" id="followersPanel">
           <div class="upload-copy">
+            <span class="step-label" data-i18n="stepTwo">步骤 2</span>
             <h2>followers_1.json</h2>
-            <p>正在关注我的人，通常是包含 string_list_data 的数组。</p>
+            <p data-i18n="followersHelp">正在关注我的人，通常是包含 string_list_data 的数组。</p>
           </div>
           <label class="file-drop" for="followersInput">
-            <span class="file-icon" aria-hidden="true">↑</span>
-            <span class="file-main">选择 followers_1.json</span>
-            <span class="file-name" id="followersFileName">尚未选择文件</span>
+            <span class="file-icon" aria-hidden="true">+</span>
+            <span class="file-main" data-i18n="followersChoose">选择 followers_1.json</span>
+            <span class="file-name" id="followersFileName" data-i18n="noFile">尚未选择文件</span>
           </label>
           <input id="followersInput" type="file" accept=".json,application/json" />
           <p class="file-error" id="followersError" role="alert"></p>
         </div>
       </section>
 
-      <section class="actions" aria-label="筛选操作">
-        <button class="primary-button" id="compareButton" type="button">筛选未回关用户</button>
+      <section class="actions" aria-label="Compare lists">
+        <button class="primary-button" id="compareButton" type="button" data-i18n="compare">筛选未回关用户</button>
         <p id="statusMessage" class="status-message" role="status"></p>
       </section>
 
       <section class="results" id="resultsSection" hidden>
-        <div class="stats-grid" aria-label="统计结果">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow" data-i18n="resultsEyebrow">结果</p>
+            <h2 data-i18n="resultsTitle">未回关名单</h2>
+          </div>
+        </div>
+
+        <div class="stats-grid" aria-label="Summary">
           <article class="stat-card">
-            <span class="stat-label">我关注的人</span>
+            <span class="stat-label" data-i18n="followingCount">我关注的人</span>
             <strong id="followingCount">0</strong>
           </article>
           <article class="stat-card">
-            <span class="stat-label">关注我的人</span>
+            <span class="stat-label" data-i18n="followersCount">关注我的人</span>
             <strong id="followersCount">0</strong>
           </article>
           <article class="stat-card accent">
-            <span class="stat-label">没有回关我</span>
+            <span class="stat-label" data-i18n="notFollowingBackCount">没有回关我</span>
             <strong id="notFollowingBackCount">0</strong>
           </article>
         </div>
 
         <div class="table-toolbar">
           <label class="search-box">
-            <span>搜索用户名</span>
-            <input id="searchInput" type="search" placeholder="输入 username" autocomplete="off" />
+            <span data-i18n="searchLabel">搜索用户名</span>
+            <input id="searchInput" type="search" data-i18n-placeholder="searchPlaceholder" placeholder="输入 username" autocomplete="off" />
           </label>
           <div class="tool-buttons">
-            <button id="copyButton" type="button">复制用户名</button>
-            <button id="csvButton" type="button">下载 CSV</button>
+            <button id="copyButton" type="button" data-i18n="copy">复制用户名</button>
+            <button id="csvButton" type="button" data-i18n="downloadCsv">下载 CSV</button>
           </div>
         </div>
 
@@ -84,11 +104,12 @@
           <table>
             <thead>
               <tr>
-                <th>用户名</th>
-                <th>Instagram 链接</th>
+                <th data-i18n="username">用户名</th>
+                <th data-i18n="instagramLink">Instagram 链接</th>
                 <th>
                   <button class="sort-button" id="sortButton" type="button">
-                    关注时间 <span id="sortLabel">新到旧</span>
+                    <span data-i18n="followedAt">关注时间</span>
+                    <span id="sortLabel">新到旧</span>
                   </button>
                 </th>
               </tr>
@@ -97,7 +118,7 @@
           </table>
         </div>
 
-        <p class="empty-state" id="emptyState" hidden>没有找到匹配的未回关用户。</p>
+        <p class="empty-state" id="emptyState" hidden data-i18n="empty">没有找到匹配的未回关用户。</p>
       </section>
     </main>
 
